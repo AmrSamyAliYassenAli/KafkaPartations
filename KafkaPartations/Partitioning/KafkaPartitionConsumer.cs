@@ -8,13 +8,14 @@ public class KafkaPartitionConsumer
     private readonly string _topic;
     private readonly int _partition;
 
-    public KafkaPartitionConsumer(string bootstrapServers, string groupId, string topic, int partition)
+    public KafkaPartitionConsumer(string bootstrapServers, string groupId, string topic, int partition, PartitionAssignmentStrategy partitionAssignmentStrategy)
     {
         _config = new ConsumerConfig
         {
             BootstrapServers = bootstrapServers,
             GroupId = groupId,
-            AutoOffsetReset = AutoOffsetReset.Earliest
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            PartitionAssignmentStrategy = partitionAssignmentStrategy
         };
         _topic = topic;
         _partition = partition;
@@ -31,6 +32,7 @@ public class KafkaPartitionConsumer
             {
                 ConsumeResult<Ignore, string>? consumeResult  = consumer.Consume(cancellationToken);
                 Console.WriteLine($"Consumed message '{consumeResult.Message.Value}' from: '{consumeResult.TopicPartitionOffset}'.");
+                consumer.Commit();
             }
         }
         catch (OperationCanceledException)

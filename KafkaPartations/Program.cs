@@ -1,4 +1,5 @@
-﻿using KafkaPartations;
+﻿using Confluent.Kafka;
+using KafkaPartations;
 
 string? bootstrapServers = "192.168.20.91:30094";
 string? topicName = "kafkaPartitionProducer";
@@ -32,7 +33,7 @@ Func<Task>? ProduceOnPartation = async () =>
 Func<Task>? KafkaPartitionConsumers = async () =>
 {
     CancellationTokenSource cancellationTokenSource= new CancellationTokenSource();
-    KafkaPartitionConsumer kafkaPartitionConsumer = new(bootstrapServers, groupId, topicName, partition: 1);
+    KafkaPartitionConsumer kafkaPartitionConsumer = new(bootstrapServers, groupId, topicName, partition: 1, PartitionAssignmentStrategy.CooperativeSticky);
     await kafkaPartitionConsumer.ConsumeMessagesAsync(cancellationTokenSource.Token);
 };
 
