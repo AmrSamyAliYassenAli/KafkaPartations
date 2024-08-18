@@ -22,10 +22,10 @@ Func<Task>? ProduceOnPartation = async () =>
         // Acks.None: Don't wait for any Acknologement.
         // Acks.Leader: Wait for Master Broker to Acknologement.
         // Acks.All: Wait for Master and Replicas Brokers to Acknologement. if only master brocker recived Message it will throw execption Not-Enough-Replicas
-        
-        await kafkaPartitionProducer.ProduceAsync("Message1", 0, Acks.None);
-        await kafkaPartitionProducer.ProduceAsync("ServiceNow Inc.", 1, Acks.Leader);
-        await kafkaPartitionProducer.ProduceAsync("kafkaPartitionProducer", 2, Acks.All);
+    
+        await kafkaPartitionProducer.ProduceAsync("Message1", 0, Acks.None, true);
+        await kafkaPartitionProducer.ProduceAsync("ServiceNow Inc.", 1, Acks.Leader, true);
+        await kafkaPartitionProducer.ProduceAsync("kafkaPartitionProducer", 2, Acks.All, true);
     }
     catch (Exception ex)
     {
