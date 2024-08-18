@@ -19,9 +19,9 @@ Func<Task>? ProduceOnPartation = async () =>
     {
         KafkaPartitionProducer kafkaPartitionProducer = new KafkaPartitionProducer(bootstrapServers, topicName);
 
-        await kafkaPartitionProducer.ProduceAsync("Message1", 0);
-        await kafkaPartitionProducer.ProduceAsync("ServiceNow Inc.", 1);
-        await kafkaPartitionProducer.ProduceAsync("kafkaPartitionProducer", 2);
+        await kafkaPartitionProducer.ProduceAsync("Message1", 0, Acks.All);
+        await kafkaPartitionProducer.ProduceAsync("ServiceNow Inc.", 1, Acks.All);
+        await kafkaPartitionProducer.ProduceAsync("kafkaPartitionProducer", 2, Acks.All);
     }
     catch (Exception ex)
     {

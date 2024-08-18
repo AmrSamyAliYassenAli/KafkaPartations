@@ -14,9 +14,13 @@ public class KafkaPartitionProducer
     }
 // disable create kafka topic from ProduceAsync only create topic from AdminClient
 // server.properties => auto.create.topics.enable=false
-    public async Task ProduceAsync(string message, int partition)
+    public async Task ProduceAsync(string message, int partition, Acks acks)
     {
-        ProducerConfig config = new () { BootstrapServers = _bootstrapServers };
+        ProducerConfig config = new () 
+        { 
+            BootstrapServers = _bootstrapServers,
+            Acks = acks
+        };
 
         using (IProducer<Null, string> producer = new ProducerBuilder<Null, string>(config).Build())
         {
