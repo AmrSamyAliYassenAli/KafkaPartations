@@ -15,6 +15,7 @@ public class KafkaPartitionConsumer
             BootstrapServers = bootstrapServers,
             GroupId = groupId,
             AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnableAutoCommit = false,
             PartitionAssignmentStrategy = partitionAssignmentStrategy
         };
         _topic = topic;
@@ -25,7 +26,7 @@ public class KafkaPartitionConsumer
     {
         using IConsumer<Ignore, string>? consumer = new ConsumerBuilder<Ignore, string>(_config).Build();
         consumer.Assign(new TopicPartition(_topic, new Partition(_partition)));
-
+        
         try
         {
             while (!cancellationToken.IsCancellationRequested)
