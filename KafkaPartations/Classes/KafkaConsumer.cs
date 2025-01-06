@@ -2,13 +2,13 @@ using Confluent.Kafka;
 
 namespace KafkaPartations;
 
-public class KafkaPartitionConsumer 
+public class KafkaConsumer 
 {
     private readonly ConsumerConfig _config;
     private readonly string _topic;
     private readonly int _partition;
 
-    public KafkaPartitionConsumer(string bootstrapServers, string groupId, string topic, int partition, PartitionAssignmentStrategy partitionAssignmentStrategy)
+    public KafkaConsumer(string bootstrapServers, string groupId, string topic, int partition, PartitionAssignmentStrategy partitionAssignmentStrategy)
     {
         _config = new ConsumerConfig
         {

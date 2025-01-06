@@ -17,7 +17,7 @@ Func<Task>? ProduceOnPartation = async () =>
 {
     try
     {
-        KafkaPartitionProducer kafkaPartitionProducer = new KafkaPartitionProducer(bootstrapServers, topicName);
+        KafkaProducer kafkaPartitionProducer = new (bootstrapServers, topicName);
 
         // Acks.None: Don't wait for any Acknologement.
         // Acks.Leader: Wait for Master Broker to Acknologement.
@@ -37,7 +37,7 @@ Func<Task>? ProduceOnPartation = async () =>
 Func<Task>? KafkaPartitionConsumers = async () =>
 {
     CancellationTokenSource cancellationTokenSource= new CancellationTokenSource();
-    KafkaPartitionConsumer kafkaPartitionConsumer = new(bootstrapServers, groupId, topicName, partition: 1, PartitionAssignmentStrategy.CooperativeSticky);
+    KafkaConsumer kafkaPartitionConsumer = new(bootstrapServers, groupId, topicName, partition: 1, PartitionAssignmentStrategy.CooperativeSticky);
     await kafkaPartitionConsumer.ConsumeMessagesAsync(cancellationTokenSource.Token);
 };
 

@@ -2,12 +2,12 @@ using Confluent.Kafka;
 
 namespace KafkaPartations;
 
-public class KafkaPartitionProducer
+public class KafkaProducer
 {
     private readonly string _bootstrapServers;
     private readonly string _topic;
 
-    public KafkaPartitionProducer(string bootstrapServers, string topic)
+    public KafkaProducer(string bootstrapServers, string topic)
     {
         _bootstrapServers = bootstrapServers;
         _topic = topic;
@@ -55,9 +55,9 @@ public class KafkaPartitionProducer
 
     public async Task ProduceBatchesAsync(string topic, List<string> messages, int batchSize = 10)
     {
-        var messageBatches = SplitMessagesIntoBatches(messages, batchSize);
+        List<List<string>>? messageBatches = SplitMessagesIntoBatches(messages, batchSize);
 
-        var config = new ProducerConfig
+        ProducerConfig? config = new ProducerConfig
         {
             BootstrapServers = "192.168.20.91:30094",
             Acks = Acks.All, // Wait for all replicas to acknowledge
@@ -68,15 +68,15 @@ public class KafkaPartitionProducer
         };
         using (IProducer<string, string>? producer = new ProducerBuilder<string, string>(config).Build())
         {
-            foreach (var batch in messageBatches)
+            foreach (List<string>? batch in messageBatches)
             {
                 try
                 {
-                    foreach (var message in batch)
+                    foreach (string message in batch)
                     {
-                        var partitionKey = messageBatches.Count();  // Optionally implement custom partitioning
+                        int partitionKey = messageBatches.Count();  // Optionally implement custom partitioning
 
-                        var kafkaMessage = new Message<string, string>
+                        Message<string, string>? kafkaMessage = new Message<string, string>
                         {
                             Key = partitionKey.ToString(),
                             Value = message

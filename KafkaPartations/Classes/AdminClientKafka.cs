@@ -1,7 +1,8 @@
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using KafkaPartations.Interfaces;
 
-public class AdminClientKafka
+public class AdminClientKafka : IAdminClientKafka
 {
     public async Task Create(string? bootstrapServers, string? topicName, int numPartitions, short replicationFactor = 1)
     {
@@ -10,7 +11,7 @@ public class AdminClientKafka
         try
         {
             // Create the topic
-            await adminClient.CreateTopicsAsync(new List<TopicSpecification>
+            await adminClient.CreateTopicsAsync(topics: new List<TopicSpecification>
             {
                 new TopicSpecification
                 {
@@ -29,33 +30,33 @@ public class AdminClientKafka
                 }
             });
 
-            Console.WriteLine($"Topic '{topicName}' created with {numPartitions} partitions.");
+            Console.WriteLine(value: $"Topic '{topicName}' created with {numPartitions} partitions.");
         }
         catch (CreateTopicsException e)
         {
-            Console.WriteLine($"An error occurred creating topic {topicName}: {e.Results[0].Error.Reason}");
+            Console.WriteLine(value: $"An error occurred creating topic {topicName}: {e.Results[0].Error.Reason}");
         }
     }
 
     public int GetNumberOfPartitions(string? bootstrapServers, string topic)
     {
-        using var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = bootstrapServers }).Build();
+        using IAdminClient? adminClient = new AdminClientBuilder(config: new AdminClientConfig { BootstrapServers = bootstrapServers }).Build();
 
         try
         {
-            var metadata = adminClient.GetMetadata(topic, TimeSpan.FromSeconds(10));
-            var topicMetadata = metadata.Topics.FirstOrDefault(t => t.Topic == topic);
+            Metadata? metadata = adminClient.GetMetadata(topic, timeout: TimeSpan.FromSeconds(10));
+            TopicMetadata? topicMetadata = metadata.Topics.FirstOrDefault( predicate: t => t.Topic == topic);
 
             if (topicMetadata is null)
             {
-                throw new Exception($"Topic '{topic}' not found.");
+                throw new Exception(message: $"Topic '{topic}' not found.");
             }
 
             return topicMetadata.Partitions.Count;
         }
         catch (KafkaException ex)
         {
-            Console.WriteLine($"An error occurred: {ex.Error.Reason}");
+            Console.WriteLine(value: $"An error occurred: {ex.Error.Reason}");
             throw;
         }
     }
@@ -64,9 +65,9 @@ public class AdminClientKafka
     {
         try
         {
-            using IAdminClient? adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = bootstrapServers }).Build();
+            using IAdminClient? adminClient = new AdminClientBuilder(config: new AdminClientConfig { BootstrapServers = bootstrapServers }).Build();
 
-            await adminClient.CreatePartitionsAsync(new List<PartitionsSpecification> { new ()
+            await adminClient.CreatePartitionsAsync(partitionsSpecifications: new List<PartitionsSpecification> { new ()
             {
                 Topic = topicName,
                 IncreaseTo = newPartitionCount

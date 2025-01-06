@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "PEpaX+ZXU1k=",
+  "dgSpecHash": "imHkvHhLXRE=",
   "success": true,
   "projectFilePath": "/Users/amr.samy/Projects/KafkaPartations/KafkaPartations/KafkaPartations.csproj",
   "expectedPackageFiles": [
     "/Users/amr.samy/.nuget/packages/confluent.kafka/2.5.2/confluent.kafka.2.5.2.nupkg.sha512",
-    "/Users/amr.samy/.nuget/packages/librdkafka.redist/2.5.0/librdkafka.redist.2.5.0.nupkg.sha512"
+    "/Users/amr.samy/.nuget/packages/librdkafka.redist/2.5.0/librdkafka.redist.2.5.0.nupkg.sha512",
+    "/Users/amr.samy/.nuget/packages/system.reactive/6.0.1/system.reactive.6.0.1.nupkg.sha512"
   ],
   "logs": []
 }
