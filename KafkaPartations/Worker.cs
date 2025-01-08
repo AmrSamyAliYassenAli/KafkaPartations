@@ -23,13 +23,13 @@ public class Worker : BackgroundService
             List<DataModel> data = DataModel.GetSeading(seadCount);
 
             // Run the producer in a separate thread
-            var producerTask = Task.Run(async () =>
+            Task? producerTask = Task.Run(async () =>
             {
                 await _kafkaProducer.ProduceBatchesAsync(data, batchSize);
             }, stoppingToken);
 
             // Run the consumer in a separate thread
-            var consumerTask = Task.Run(() =>
+            Task? consumerTask = Task.Run(() =>
             {
                 _kafkaConsumer.ConsumeMessagesAsync(stoppingToken);
             }, stoppingToken);

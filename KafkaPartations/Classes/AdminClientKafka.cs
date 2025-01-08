@@ -6,7 +6,7 @@ namespace POCKafkaWorker.Classes;
 
 public class AdminClientKafka : IAdminClientKafka
 {
- public async Task Create(string? bootstrapServers, string? topicName, int numPartitions, short replicationFactor = 1)
+ public async Task CreateAsync(string? bootstrapServers, string? topicName, int numPartitions, short replicationFactor = 1)
     {
         using IAdminClient? adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = bootstrapServers }).Build();
 
@@ -37,6 +37,7 @@ public class AdminClientKafka : IAdminClientKafka
         catch (CreateTopicsException e)
         {
             Console.WriteLine(value: $"An error occurred creating topic {topicName}: {e.Results[0].Error.Reason}");
+            throw;
         }
     }
 

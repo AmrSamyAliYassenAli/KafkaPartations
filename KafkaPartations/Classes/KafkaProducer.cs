@@ -27,7 +27,11 @@ public class KafkaProducer : IKafkaProducer
             .Select(selector: g => g.Select(x => x.data).ToList())
             .ToList();
 
-        int partitionCount = _adminClient.GetNumberOfPartitions(_producerConfig.BootstrapServers, _topic);
+        int partitionCount = batches.Count;
+
+// check if topic is created with the number of partations needed else create if it is created but with differnt number of partaions update it
+
+        await _adminClient.CreateAsync(_producerConfig.BootstrapServers, _topic, partitionCount, 1);
 
         int maxDegreeOfParallelism = (Environment.ProcessorCount < partitionCount)? Environment.ProcessorCount : partitionCount;
 
