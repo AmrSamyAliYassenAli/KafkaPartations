@@ -29,8 +29,6 @@ public class KafkaProducer : IKafkaProducer
 
         int numberOfPartitions = batches.Count;
 
-// check if topic is created with the number of partations needed else create if it is created but with differnt number of partaions update it
-
         await _adminClient.EnsureTopicPartitionCountAsync(_topic, numberOfPartitions);
 
         int maxDegreeOfParallelism = (Environment.ProcessorCount < numberOfPartitions)? Environment.ProcessorCount : numberOfPartitions;
