@@ -1,10 +1,12 @@
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
-using KafkaPartations.Interfaces;
+using POCKafkaWorker.Interfaces;
+
+namespace POCKafkaWorker.Classes;
 
 public class AdminClientKafka : IAdminClientKafka
 {
-    public async Task Create(string? bootstrapServers, string? topicName, int numPartitions, short replicationFactor = 1)
+ public async Task Create(string? bootstrapServers, string? topicName, int numPartitions, short replicationFactor = 1)
     {
         using IAdminClient? adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = bootstrapServers }).Build();
 
@@ -75,8 +77,7 @@ public class AdminClientKafka : IAdminClientKafka
 
         }
         catch (CreatePartitionsException ex)
-        {
-            
+        {           
             throw;
         }
     }

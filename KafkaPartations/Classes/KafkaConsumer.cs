@@ -1,44 +1,50 @@
 using Confluent.Kafka;
+using Microsoft.Extensions.Options;
+using POCKafkaWorker.Interfaces;
+using POCKafkaWorker.Models;
 
-namespace KafkaPartations;
+namespace POCKafkaWorker.Classes;
 
-public class KafkaConsumer 
+public class KafkaConsumer : IKafkaConsumer
 {
     private readonly ConsumerConfig _config;
+    private readonly IAdminClientKafka _adminClient;
     private readonly string _topic;
-    private readonly int _partition;
 
-    public KafkaConsumer(string bootstrapServers, string groupId, string topic, int partition, PartitionAssignmentStrategy partitionAssignmentStrategy)
+    public KafkaConsumer(IOptions<KafkaOptions> options, IAdminClientKafka adminClient)
     {
-        _config = new ConsumerConfig
-        {
-            BootstrapServers = bootstrapServers,
-            GroupId = groupId,
-            AutoOffsetReset = AutoOffsetReset.Earliest,
-            EnableAutoCommit = false,
-            PartitionAssignmentStrategy = partitionAssignmentStrategy
-        };
-        _topic = topic;
-        _partition = partition;
+        _config = options?.Value?.ConsumerConfig!;
+        _topic = options?.Value?.Topic!;
+        _adminClient = adminClient;
     }
 
-    public async Task ConsumeMessagesAsync(CancellationToken cancellationToken)
+    public void ConsumeMessagesAsync(CancellationToken cancellationToken)
     {
-        using IConsumer<Ignore, string>? consumer = new ConsumerBuilder<Ignore, string>(_config).Build();
-        consumer.Assign(new TopicPartition(_topic, new Partition(_partition)));
-        
-        try
+        int partitions = _adminClient.GetNumberOfPartitions(bootstrapServers: _config.BootstrapServers, topic: _topic);
+
+        List<TopicPartition>? partitionList = Enumerable
+                                                .Range(start: 0, count: partitions)
+                                                .Select(selector: partition => new TopicPartition(topic: _topic, partition: new Partition(partition)))
+                                                .ToList();
+
+        Parallel.ForEach(partitionList, (partition, state) =>
         {
-            while (!cancellationToken.IsCancellationRequested)
+            using IConsumer<Ignore, string> consumer = new ConsumerBuilder<Ignore, string>(_config).Build();
+            consumer.Assign(partition);
+
+            try
             {
-                ConsumeResult<Ignore, string>? consumeResult  = consumer.Consume(cancellationToken);
-                Console.WriteLine($"Consumed message '{consumeResult.Message.Value}' from: '{consumeResult.TopicPartitionOffset}'.");
-                consumer.Commit();
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    ConsumeResult<Ignore, string> consumeResult = consumer.Consume(cancellationToken);
+                    Console.WriteLine(value: $"Consumed message '{consumeResult.Message.Value}' from: '{consumeResult.TopicPartitionOffset}'.");
+                    consumer.Commit();
+                }
             }
-        }
-        catch (OperationCanceledException)
-        {
-            consumer.Close();
-        }
+            catch (OperationCanceledException)
+            {
+                consumer.Close();
+            }
+        });
     }
 }

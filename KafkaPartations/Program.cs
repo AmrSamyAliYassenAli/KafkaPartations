@@ -1,50 +1,16 @@
-﻿using Confluent.Kafka;
-using KafkaPartations;
+﻿using KafkaPartations.Utilities;
+using POCKafkaWorker;
 
-string? bootstrapServers = "192.168.20.91:30094";
-string? topicName = "kafkaPartitionProducer";
-string? groupId = "group1";
-int numberOfPartitions;
+HostApplicationBuilder? builder = Host.CreateApplicationBuilder(args);
+IServiceCollection? services = builder.Services;
+ConfigurationManager? configuration = builder.Configuration;
 
-Func<Task>? KafkaTopicHandlerCreation = async () =>
-{
-    AdminClientKafka kafkaTopicHandler = new AdminClientKafka();
-    await kafkaTopicHandler.Create(bootstrapServers, topicName, 3);
-    numberOfPartitions = kafkaTopicHandler.GetNumberOfPartitions(bootstrapServers, topicName);
-};
+services.AddInjectionUtility();
 
-Func<Task>? ProduceOnPartation = async () =>
-{
-    try
-    {
-        KafkaProducer kafkaPartitionProducer = new (bootstrapServers, topicName);
+services.AddOptionsUtility(configuration);
 
-        // Acks.None: Don't wait for any Acknologement.
-        // Acks.Leader: Wait for Master Broker to Acknologement.
-        // Acks.All: Wait for Master and Replicas Brokers to Acknologement. if only master brocker recived Message it will throw execption Not-Enough-Replicas
-    
-        await kafkaPartitionProducer.ProduceAsync("Message1", 0, Acks.None, true);
-        await kafkaPartitionProducer.ProduceAsync("ServiceNow Inc.", 1, Acks.Leader, true);
-        await kafkaPartitionProducer.ProduceAsync("kafkaPartitionProducer", 2, Acks.All, true);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-        throw;
-    }
-};
+services.AddHostedService<Worker>();
 
-Func<Task>? KafkaPartitionConsumers = async () =>
-{
-    CancellationTokenSource cancellationTokenSource= new CancellationTokenSource();
-    KafkaConsumer kafkaPartitionConsumer = new(bootstrapServers, groupId, topicName, partition: 1, PartitionAssignmentStrategy.CooperativeSticky);
-    await kafkaPartitionConsumer.ConsumeMessagesAsync(cancellationTokenSource.Token);
-};
+IHost? host = builder.Build();
 
-await KafkaTopicHandlerCreation();
-
-await ProduceOnPartation();
-
-await KafkaPartitionConsumers();
-
-// 
+host.Run();
