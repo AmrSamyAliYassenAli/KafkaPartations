@@ -74,12 +74,12 @@ public class AdminClientKafka : IAdminClientKafka
 
     public async Task EnsureTopicPartitionCountAsync(string topicName, int numberOfPartitions)
     {
-        using var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = _bootstrapServers }).Build();
+        using IAdminClient adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = _bootstrapServers }).Build();
 
         try
         {
             // Get metadata for the topic
-            var metadata = adminClient.GetMetadata(topicName, TimeSpan.FromSeconds(10));
+            Metadata? metadata = adminClient.GetMetadata(topicName, TimeSpan.FromSeconds(10));
 
             // Case 1: Topic is not created
             if (!metadata.Topics.Exists(t => t.Topic == topicName))
@@ -88,7 +88,7 @@ public class AdminClientKafka : IAdminClientKafka
             }
             else
             {
-                var topicMetadata = metadata.Topics.First(t => t.Topic == topicName);
+                TopicMetadata? topicMetadata = metadata.Topics.First(t => t.Topic == topicName);
                 int currentPartitionCount = topicMetadata.Partitions.Count;
 
                 // Case 2: Created with different number of partitions
@@ -111,7 +111,7 @@ public class AdminClientKafka : IAdminClientKafka
 
     private async Task CreateTopicAsync(string topicName, int numberOfPartitions)
     {
-        var topicSpecifications = new TopicSpecification
+        TopicSpecification? topicSpecifications = new ()
         {
             Name = topicName,
             NumPartitions = numberOfPartitions,
