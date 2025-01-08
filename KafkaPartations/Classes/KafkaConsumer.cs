@@ -37,7 +37,7 @@ public class KafkaConsumer : IKafkaConsumer
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     ConsumeResult<Ignore, string> consumeResult = consumer.Consume(cancellationToken);
-                    Console.WriteLine(value: $"Consumed partition{partition} message '{consumeResult.Message.Value}' from: '{consumeResult.TopicPartitionOffset}'.");
+                    Console.WriteLine(value: $"Consumed partition({partition.Partition.Value}) message '{consumeResult.Message.Value}' from: '{consumeResult.TopicPartitionOffset}'.");
                     consumer.Commit();
                 }
             }
