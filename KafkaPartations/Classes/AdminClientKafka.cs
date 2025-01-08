@@ -77,7 +77,8 @@ public class AdminClientKafka : IAdminClientKafka
 
         }
         catch (CreatePartitionsException ex)
-        {           
+        {   
+            // log  
             throw;
         }
     }

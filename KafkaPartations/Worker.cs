@@ -39,8 +39,6 @@ public class Worker : BackgroundService
 
             // Optionally, you can handle cancellation or other task completion logic here
             Console.WriteLine("Producer and Consumer tasks have completed.");
-
-
         }
     }
 }
