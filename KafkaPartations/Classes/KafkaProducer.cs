@@ -31,7 +31,7 @@ public class KafkaProducer : IKafkaProducer
 
 // check if topic is created with the number of partations needed else create if it is created but with differnt number of partaions update it
 
-        await _adminClient.CreateAsync(_producerConfig.BootstrapServers, _topic, partitionCount, 1);
+        await _adminClient.CreateAsync(_topic, partitionCount, 1);
 
         int maxDegreeOfParallelism = (Environment.ProcessorCount < partitionCount)? Environment.ProcessorCount : partitionCount;
 

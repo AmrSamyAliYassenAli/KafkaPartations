@@ -20,7 +20,7 @@ public class KafkaConsumer : IKafkaConsumer
 
     public void ConsumeMessagesAsync(CancellationToken cancellationToken)
     {
-        int partitions = _adminClient.GetNumberOfPartitions(bootstrapServers: _config.BootstrapServers, topic: _topic);
+        int partitions = _adminClient.GetNumberOfPartitions(topic: _topic);
 
         List<TopicPartition>? partitionList = Enumerable
                                                 .Range(start: 0, count: partitions)
