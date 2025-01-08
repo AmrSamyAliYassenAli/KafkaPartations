@@ -31,7 +31,7 @@ public class KafkaProducer : IKafkaProducer
 
         await _adminClient.EnsureTopicPartitionCountAsync(_topic, numberOfPartitions);
 
-        int maxDegreeOfParallelism = (Environment.ProcessorCount < numberOfPartitions)? Environment.ProcessorCount : numberOfPartitions;
+        int maxDegreeOfParallelism = (Environment.ProcessorCount < numberOfPartitions) ? Environment.ProcessorCount : numberOfPartitions;
 
         await Parallel.ForEachAsync(
             source: batches,
@@ -51,6 +51,8 @@ public class KafkaProducer : IKafkaProducer
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error producing batch on partition {i}: {ex.Message}");
+                        // log or make event DLQ
+                        continue;
                     }
                 }
             });
@@ -64,9 +66,16 @@ public class KafkaProducer : IKafkaProducer
         {
             foreach (DataModel data in batch)
             {
-                var message = new Message<Null, string> { Value = JsonSerializer.Serialize(data) };
-
-                await producer.ProduceAsync(new TopicPartition(_topic, new Partition(partition)), message);
+                try
+                {
+                    Message<Null, string>? message = new (){ Value = JsonSerializer.Serialize(data) };
+                    await producer.ProduceAsync(new TopicPartition(_topic, new Partition(partition)), message);
+                }
+                catch (Exception ex)
+                {
+                    // log or make event DLQ
+                    continue;
+                }
             }
 
             producer.Flush(TimeSpan.FromSeconds(10));
