@@ -62,13 +62,17 @@ public class KafkaProducer : IKafkaProducer
 
     private async Task ProduceBatchAsync(List<DataModel> batch, int partition)
     {
-        using (IProducer<Null, string> producer = new ProducerBuilder<Null, string>(_producerConfig).Build())
+        using (IProducer<string, string> producer = new ProducerBuilder<string, string>(_producerConfig).Build())
         {
+            int i = 1;
             foreach (DataModel data in batch)
             {
                 try
                 {
-                    Message<Null, string>? message = new (){ Value = JsonSerializer.Serialize(data) };
+                    string cameraId = "camera1";
+                    string personId = "person" + i;
+                    string key = $"{cameraId}-{personId}";
+                    Message<string, string>? message = new() { Key = key, Value = JsonSerializer.Serialize(data) };
                     await producer.ProduceAsync(new TopicPartition(_topic, new Partition(partition)), message);
                 }
                 catch (Exception ex)
@@ -76,6 +80,26 @@ public class KafkaProducer : IKafkaProducer
                     // log or make event DLQ
                     continue;
                 }
+            }
+
+            producer.Flush(TimeSpan.FromSeconds(10));
+        }
+    }
+    private async Task ProducePartitionerAsync(List<DataModel> batch)
+    {
+        _producerConfig.Partitioner = Partitioner.Murmur2;
+
+        using (var producer = new ProducerBuilder<string, string>(_producerConfig).Build())
+        {
+            for (int i = 0; i < batch.Count; i++)
+            {
+                string cameraId = "camera1";
+                string personId = "person" + i;
+                string key = $"{cameraId}-{personId}";
+                string value = $"Message for {personId} from {cameraId} {batch[i].Id}, {batch[i].Name} {batch[i].Value}";
+
+                var deliveryResult = await producer.ProduceAsync("my-topic", new Message<string, string> { Key = key, Value = value });
+                Console.WriteLine($"Delivered '{deliveryResult.Value}' to '{deliveryResult.TopicPartitionOffset}' with key '{key}'");
             }
 
             producer.Flush(TimeSpan.FromSeconds(10));

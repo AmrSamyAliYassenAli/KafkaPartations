@@ -12,6 +12,8 @@ public class Worker : BackgroundService
         _kafkaConsumer = kafkaConsumer;
     }
 
+    
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
