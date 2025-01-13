@@ -31,13 +31,14 @@ public class Worker : BackgroundService
             }, stoppingToken);
 
             // Run the consumer in a separate thread
-            Task? consumerTask = Task.Run(() =>
-            {
-                _kafkaConsumer.ConsumeMessagesAsync(stoppingToken);
-            }, stoppingToken);
+            // Task? consumerTask = Task.Run(() =>
+            // {
+            //     _kafkaConsumer.ConsumeMessagesAsync(stoppingToken);
+            // }, stoppingToken);
 
             // Wait for both tasks to complete
-            await Task.WhenAll(producerTask, consumerTask);
+            await Task.WhenAll(producerTask);
+            // , consumerTask);
 
             // Optionally, you can handle cancellation or other task completion logic here
             Console.WriteLine("Producer and Consumer tasks have completed.");

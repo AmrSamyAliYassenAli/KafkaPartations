@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("KafkaPartations")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d534499fffecce824075877b1d3809fa2d3de635")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0a0a50de5b492b0bde25b9c2fc6b041456a9899e")]
 [assembly: System.Reflection.AssemblyProductAttribute("KafkaPartations")]
 [assembly: System.Reflection.AssemblyTitleAttribute("KafkaPartations")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

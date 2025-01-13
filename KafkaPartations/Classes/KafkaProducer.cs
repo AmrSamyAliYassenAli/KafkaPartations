@@ -45,7 +45,7 @@ public class KafkaProducer : IKafkaProducer
 
                     try
                     {
-                        await ProduceBatchAsync(batch, i); // Process the batch on the specified partition
+                        await ProducePartitionerAsync(batch); // Process the batch on the specified partition
                         Console.WriteLine($"Batch produced on partition {i}.");
                     }
                     catch (Exception ex)
@@ -69,7 +69,7 @@ public class KafkaProducer : IKafkaProducer
             {
                 try
                 {
-                    string cameraId = "camera1";
+                    string cameraId = "camera";
                     string personId = "person" + i;
                     string key = $"{cameraId}-{personId}";
                     Message<string, string>? message = new() { Key = key, Value = JsonSerializer.Serialize(data) };
@@ -85,24 +85,33 @@ public class KafkaProducer : IKafkaProducer
             producer.Flush(TimeSpan.FromSeconds(10));
         }
     }
+   
     private async Task ProducePartitionerAsync(List<DataModel> batch)
     {
-        _producerConfig.Partitioner = Partitioner.Murmur2;
-
-        using (var producer = new ProducerBuilder<string, string>(_producerConfig).Build())
+        try
         {
-            for (int i = 0; i < batch.Count; i++)
+            _producerConfig.Partitioner = Partitioner.ConsistentRandom;
+            _producerConfig.StickyPartitioningLingerMs = 10;
+
+            using (var producer = new ProducerBuilder<string, string>(_producerConfig).Build())
             {
-                string cameraId = "camera1";
-                string personId = "person" + i;
-                string key = $"{cameraId}-{personId}";
-                string value = $"Message for {personId} from {cameraId} {batch[i].Id}, {batch[i].Name} {batch[i].Value}";
+                for (int i = 0; i < batch.Count; i++)
+                {
+                    string cameraId = "camera2";
+                    string personId = "person" + i;
+                    string key = $"{cameraId}-{personId}";
+                    string value = $"Message for {personId} from {cameraId} {batch[i].Id}, {batch[i].Name} {batch[i].Value}";
 
-                var deliveryResult = await producer.ProduceAsync("my-topic", new Message<string, string> { Key = key, Value = value });
-                Console.WriteLine($"Delivered '{deliveryResult.Value}' to '{deliveryResult.TopicPartitionOffset}' with key '{key}'");
+                    var deliveryResult = await producer.ProduceAsync("my-topic", new Message<string, string> { Key = key, Value = value });
+                    Console.WriteLine($"Delivered '{deliveryResult.Value}' to '{deliveryResult.TopicPartitionOffset}' with key '{key}'");
+                }
+
+                producer.Flush(TimeSpan.FromSeconds(10));
             }
-
-            producer.Flush(TimeSpan.FromSeconds(10));
+        }
+        catch (Exception ex)
+        {
+            throw ex;
         }
     }
 
